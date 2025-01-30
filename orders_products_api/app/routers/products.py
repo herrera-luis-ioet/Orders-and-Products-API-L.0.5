@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+import requests
 
 from .. import models, schemas
 from ..database import get_db
@@ -41,7 +42,7 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
 
 # PUBLIC_INTERFACE
 @router.get("/", response_model=List[schemas.Product])
-def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), authorization: str = Header(...)):
     """
     Get list of products with pagination.
     
@@ -53,8 +54,25 @@ def get_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     Returns:
         List of products
     """
-    products = db.query(models.Product).offset(skip).limit(limit).all()
-    return products
+    if not authorization:
+        raise HTTPException(status_code=400, detail="Authorization header missing")
+    
+    token = authorization.split("Bearer ")[-1] if "Bearer " in authorization else authorization
+    try:
+        headers = {"Authorization": f"Bearer {token}"}
+        verificationURL="https://5000_172_31_47_87.workspace.develop.kavia.ai/auth/verify-token"
+        response = requests.get(verificationURL, headers=headers, verify=False)
+    except:
+        raise HTTPException(status_code=400, detail="The token could not be verified")
+        return
+    
+    if response.status_code == 401:
+        raise HTTPException(status_code=401, detail="Token is not valid")
+        return
+
+    if response.status_code == 200:
+        products = db.query(models.Product).offset(skip).limit(limit).all()
+        return products
 
 # PUBLIC_INTERFACE
 @router.get("/{product_id}", response_model=schemas.Product)
