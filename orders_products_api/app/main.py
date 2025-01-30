@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from .routers import products, orders
 from . import models
 from .database import engine
+from fastapi.middleware.cors import CORSMiddleware
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -69,6 +70,13 @@ app = FastAPI(
             "description": "Operations with orders. Create and manage customer orders with automatic stock management.",
         }
     ]
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers
