@@ -1,0 +1,8 @@
+Environment initialized with required dependencies:
+- Python 3.12.3
+- pip 24.0
+- FastAPI (latest)
+- SQLite 3.45.1
+- Docker
+- pytest (latest)
+- uvicorn (latest)

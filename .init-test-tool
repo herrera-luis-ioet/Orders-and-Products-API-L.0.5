@@ -1,0 +1,4 @@
+{
+    "command": "python3 -m pytest",
+    "working_directory": "/home/kavia/workspace/orders-and-products-api-l03-orders-and-products-api-container-54370-54570-pre_prod/orders_products_api"
+}
